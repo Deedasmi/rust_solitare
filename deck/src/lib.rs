@@ -5,9 +5,9 @@ extern crate rand;
 use rand::Rng;
 
 #[derive(Debug, Clone, PartialEq)]
-pub enum Color{
+pub enum Color {
     Red,
-    Black
+    Black,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -32,7 +32,7 @@ pub struct Card {
 }
 
 impl std::fmt::Debug for Card {
-    fn fmt(&self, f:&mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}{:?}", self.rank, self.suit)
     }
 }
@@ -49,7 +49,7 @@ impl Card {
             Diamond => Red,
             Heart => Red,
             Spade => Black,
-            Club => Black
+            Club => Black,
         }
     }
 }
@@ -62,8 +62,8 @@ pub struct Deck {
 impl Deck {
     pub fn new() -> Deck {
         let mut d: Vec<Card> = Vec::new();
-        let ranks = vec!(1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14);
-        for (s, r) in iproduct!(Suit::all(), ranks ) {
+        let ranks = vec![1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14];
+        for (s, r) in iproduct!(Suit::all(), ranks) {
             d.push(Card::new(s, r));
         }
         let mut sd = Deck { cards: d };

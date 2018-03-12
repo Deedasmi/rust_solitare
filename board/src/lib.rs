@@ -16,7 +16,7 @@ pub struct Scored {
 
 impl Scored {
     pub fn new() -> Scored {
-        Scored { cards: vec!() }
+        Scored { cards: vec![] }
     }
 }
 
@@ -50,7 +50,7 @@ pub struct Col {
 
 impl Col {
     pub fn new() -> Col {
-        Col { cards: vec!() }
+        Col { cards: vec![] }
     }
     pub fn push(&mut self, c: Card) {
         self.cards.push(c);
@@ -82,7 +82,7 @@ impl Play<Col> for Col {
 
 #[derive(Debug, Clone)]
 pub struct Board {
-    // Eigth col is drawn pile. 
+    // Eigth col is drawn pile.
     pub cols: [Col; 8],
     hearts: Scored,
     diamonds: Scored,
@@ -93,7 +93,23 @@ pub struct Board {
 
 impl Board {
     pub fn new() -> Board {
-        let mut b = Board {cols: [Col::new(), Col::new(), Col::new(), Col::new(), Col::new(), Col::new(), Col::new(), Col::new()], hearts: Scored::new(), diamonds: Scored::new(), spades: Scored::new(), clubs: Scored::new(), deck: Deck::new()};
+        let mut b = Board {
+            cols: [
+                Col::new(),
+                Col::new(),
+                Col::new(),
+                Col::new(),
+                Col::new(),
+                Col::new(),
+                Col::new(),
+                Col::new(),
+            ],
+            hearts: Scored::new(),
+            diamonds: Scored::new(),
+            spades: Scored::new(),
+            clubs: Scored::new(),
+            deck: Deck::new(),
+        };
         for i in 0..7 {
             for x in i..7 {
                 b.cols[x].push(b.deck.draw().unwrap());
@@ -102,7 +118,7 @@ impl Board {
         b
     }
     pub fn can_score(&self, c: &Card) -> bool {
-         match c.suit {
+        match c.suit {
             ref Hearts => self.hearts.can_play(c),
             ref Diamonds => self.diamonds.can_play(c),
             ref Clubs => self.clubs.can_play(c),
@@ -122,7 +138,8 @@ impl Board {
     }
 
     pub fn win(&self) -> bool {
-        self.hearts.cards.len() == 13 && self.diamonds.cards.len() == 13 && self.clubs.cards.len() == 13 && self.spades.cards.len() == 13
+        self.hearts.cards.len() == 13 && self.diamonds.cards.len() == 13
+            && self.clubs.cards.len() == 13 && self.spades.cards.len() == 13
     }
 }
 
@@ -132,23 +149,53 @@ mod tests {
     use deck::{Card, Suit};
     #[test]
     fn play_col_good() {
-        let c = Col { cards: vec!(Card { suit: Suit::Diamond, rank: 8 })};
-        let a = Card { suit: Suit::Club, rank: 7 };
+        let c = Col {
+            cards: vec![
+                Card {
+                    suit: Suit::Diamond,
+                    rank: 8,
+                },
+            ],
+        };
+        let a = Card {
+            suit: Suit::Club,
+            rank: 7,
+        };
         c.play(a).unwrap();
     }
     #[test]
     #[should_panic]
     fn play_col_fail() {
-let c = Col { cards: vec!(Card { suit: Suit::Diamond, rank: 8 })};
-        let a = Card { suit: Suit::Club, rank: 8 };
+        let c = Col {
+            cards: vec![
+                Card {
+                    suit: Suit::Diamond,
+                    rank: 8,
+                },
+            ],
+        };
+        let a = Card {
+            suit: Suit::Club,
+            rank: 8,
+        };
         c.play(a).unwrap();
     }
 
     #[test]
     #[should_panic]
     fn play_col_fail2() {
-let c = Col { cards: vec!(Card { suit: Suit::Diamond, rank: 8 })};
-        let a = Card { suit: Suit::Heart, rank: 7 };
+        let c = Col {
+            cards: vec![
+                Card {
+                    suit: Suit::Diamond,
+                    rank: 8,
+                },
+            ],
+        };
+        let a = Card {
+            suit: Suit::Heart,
+            rank: 7,
+        };
         c.play(a).unwrap();
     }
 }

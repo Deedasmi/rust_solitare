@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Richard Petrie <rap1011@ksu.edu>"]
 
 [dependencies]
+time = "*"
 
 [dependencies.board]
 path = "board"
