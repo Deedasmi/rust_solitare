@@ -1,0 +1,8 @@
+[package]
+name = "deck"
+version = "0.1.0"
+authors = ["Richard Petrie <rap1011@ksu.edu>"]
+
+[dependencies]
+rand = "0.4"
+itertools = "0.7.3"

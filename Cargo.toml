@@ -1,0 +1,11 @@
+[package]
+name = "solitare"
+version = "0.1.0"
+authors = ["Richard Petrie <rap1011@ksu.edu>"]
+
+[dependencies]
+
+[dependencies.board]
+path = "board"
+
+[workspace]

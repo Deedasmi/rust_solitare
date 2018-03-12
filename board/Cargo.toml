@@ -1,0 +1,7 @@
+[package]
+name = "board"
+version = "0.1.0"
+authors = ["Richard Petrie <rap1011@ksu.edu>"]
+
+[dependencies.deck]
+path = "../deck"
