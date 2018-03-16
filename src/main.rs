@@ -34,7 +34,7 @@ fn solve(mut b: Board) -> bool {
         }
     }
 
-    // TODO track which cards are 'face down'. 
+    // TODO track which cards are 'face down'.
     // Check for card moves
     for s in 0..8 {
         let c = match b.cols[s].cards.last() {

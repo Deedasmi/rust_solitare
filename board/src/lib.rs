@@ -46,14 +46,22 @@ impl Play<Scored> for Scored {
 #[derive(Debug, Clone)]
 pub struct Col {
     pub cards: Vec<Card>,
+    pub hidden: Vec<Card>,
 }
 
 impl Col {
     pub fn new() -> Col {
-        Col { cards: vec![] }
+        Col {
+            cards: vec![],
+            hidden: vec![],
+        }
     }
-    pub fn push(&mut self, c: Card) {
-        self.cards.push(c);
+    pub fn pop(&mut self) -> Option<Card> {
+        let c = self.cards.pop();
+        if self.cards.len() == 0 && self.hidden.len() > 0 {
+            self.cards.push(self.hidden.pop().unwrap());
+        }
+        c
     }
 }
 
@@ -63,7 +71,10 @@ impl Play<Col> for Col {
             if c.rank == 14 {
                 let mut n = self.cards.clone();
                 n.push(c.clone());
-                Ok(Col { cards: n })
+                Ok(Col {
+                    cards: n,
+                    hidden: self.hidden.clone(),
+                })
             } else {
                 Err(())
             }
@@ -72,7 +83,10 @@ impl Play<Col> for Col {
             if c.rank == m.rank - 1 && c.color() != m.color() {
                 let mut n = self.cards.clone();
                 n.push(c.clone());
-                Ok(Col { cards: n })
+                Ok(Col {
+                    cards: n,
+                    hidden: self.hidden.clone(),
+                })
             } else {
                 Err(())
             }
@@ -110,11 +124,13 @@ impl Board {
             clubs: Scored::new(),
             deck: Deck::new(),
         };
-        for i in 0..7 {
+        for i in 1..7 {
+            b.cols[i - 1].cards.push(b.deck.draw().unwrap());
             for x in i..7 {
-                b.cols[x].push(b.deck.draw().unwrap());
+                b.cols[x].hidden.push(b.deck.draw().unwrap());
             }
         }
+        b.cols[6].cards.push(b.deck.draw().unwrap());
         b
     }
     pub fn can_score(&self, c: &Card) -> bool {
@@ -127,7 +143,7 @@ impl Board {
     }
     pub fn score(&self, i: usize) -> Board {
         let mut b = self.clone();
-        let c = b.cols[i].cards.pop().unwrap();
+        let c = b.cols[i].pop().unwrap();
         match c.suit {
             Hearts => b.hearts = b.hearts.play(&c).unwrap(),
             Diamonds => b.diamonds = b.diamonds.play(&c).unwrap(),
