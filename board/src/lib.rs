@@ -1,6 +1,7 @@
 extern crate deck;
 
 use deck::{Card, Deck};
+use deck::Suit::*;
 
 pub trait Play<T> {
     fn play(&self, c: &Card) -> Result<T, ()>;
@@ -135,20 +136,20 @@ impl Board {
     }
     pub fn can_score(&self, c: &Card) -> bool {
         match c.suit {
-            ref Hearts => self.hearts.can_play(c),
-            ref Diamonds => self.diamonds.can_play(c),
-            ref Clubs => self.clubs.can_play(c),
-            ref Spades => self.spades.can_play(c),
+            Heart => self.hearts.can_play(c),
+            Diamond => self.diamonds.can_play(c),
+            Club => self.clubs.can_play(c),
+            Spade => self.spades.can_play(c),
         }
     }
     pub fn score(&self, i: usize) -> Board {
         let mut b = self.clone();
         let c = b.cols[i].pop().unwrap();
         match c.suit {
-            Hearts => b.hearts = b.hearts.play(&c).unwrap(),
-            Diamonds => b.diamonds = b.diamonds.play(&c).unwrap(),
-            Clubs => b.clubs = b.clubs.play(&c).unwrap(),
-            Spades => b.spades = b.spades.play(&c).unwrap(),
+            Heart => b.hearts = b.hearts.play(&c).unwrap(),
+            Diamond => b.diamonds = b.diamonds.play(&c).unwrap(),
+            Club => b.clubs = b.clubs.play(&c).unwrap(),
+            Spade => b.spades = b.spades.play(&c).unwrap(),
         }
         b
     }
