@@ -59,6 +59,16 @@ pub struct Deck {
     pub cards: Vec<Card>,
 }
 
+impl std::fmt::Display for Deck {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let mut r = String::new();
+        for c in &self.cards {
+            r += &format!("{:?},", c)
+        }
+        write!(f, "{}", r)
+    }
+}
+
 impl Deck {
     pub fn new() -> Deck {
         let mut d: Vec<Card> = Vec::new();
@@ -80,6 +90,12 @@ impl Deck {
 
     pub fn draw(&mut self) -> Option<Card> {
         self.cards.pop()
+    }
+}
+
+impl std::convert::From<Vec<Card>> for Deck {
+    fn from(cards: Vec<Card>) -> Deck {
+        Deck { cards }
     }
 }
 

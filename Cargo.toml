@@ -5,6 +5,9 @@ authors = ["Richard Petrie <rap1011@ksu.edu>"]
 
 [dependencies]
 time = "*"
+lazy_static = "*"
+rusoto_core = "0.32.0"
+rusoto_dynamodb = "0.32.0"
 
 [dependencies.board]
 path = "board"
