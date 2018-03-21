@@ -3,9 +3,12 @@ extern crate deck;
 use deck::{Card, Deck};
 use deck::Suit::*;
 
-pub trait Play<T> {
-    fn play(&self, c: &Card) -> Result<T, ()>;
-    fn can_play(&self, c: &Card) -> bool {
+const MAX_TURNS: u8 = 3;
+const NUM_DRAW: usize = 3;
+
+pub trait Play<T, U> {
+    fn play(&self, c: &U) -> Result<T, ()>;
+    fn can_play(&self, c: &U) -> bool {
         self.play(c).is_ok()
     }
 }
@@ -21,7 +24,7 @@ impl Scored {
     }
 }
 
-impl Play<Scored> for Scored {
+impl Play<Scored, Card> for Scored {
     fn play(&self, c: &Card) -> Result<Scored, ()> {
         if self.cards.len() == 0 {
             if c.rank == 1 {
@@ -32,7 +35,7 @@ impl Play<Scored> for Scored {
                 Err(())
             }
         } else {
-            let m: &Card = self.cards.last().unwrap();
+            let m: &Card = self.cards.last().expect("Scored play");
             if c.rank == m.rank + 1 && c.suit == m.suit {
                 let mut n = self.cards.clone();
                 n.push(c.clone());
@@ -59,19 +62,23 @@ impl Col {
     }
     pub fn pop(&mut self) -> Option<Card> {
         let c = self.cards.pop();
-        if self.cards.len() == 0 && self.hidden.len() > 0 {
-            self.cards.push(self.hidden.pop().unwrap());
-        }
+        self.turn();
         c
+    }
+    pub fn turn(&mut self) {
+        if self.cards.len() == 0 && self.hidden.len() > 0 {
+            self.cards.push(self.hidden.pop().expect("Can't turn"));
+        }
     }
 }
 
-impl Play<Col> for Col {
-    fn play(&self, c: &Card) -> Result<Col, ()> {
+impl Play<Col, Vec<Card>> for Col {
+    fn play(&self, cards: &Vec<Card>) -> Result<Col, ()> {
+        let c = cards.first().expect("Col play 1");
         if self.cards.len() == 0 {
-            if c.rank == 14 {
+            if c.rank == 13 {
                 let mut n = self.cards.clone();
-                n.push(c.clone());
+                n.append(cards.clone().as_mut());
                 Ok(Col {
                     cards: n,
                     hidden: self.hidden.clone(),
@@ -80,10 +87,10 @@ impl Play<Col> for Col {
                 Err(())
             }
         } else {
-            let m = self.cards.last().unwrap();
+            let m = self.cards.last().expect("Col Play 2");
             if c.rank == m.rank - 1 && c.color() != m.color() {
                 let mut n = self.cards.clone();
-                n.push(c.clone());
+                n.append(cards.clone().as_mut());
                 Ok(Col {
                     cards: n,
                     hidden: self.hidden.clone(),
@@ -104,6 +111,7 @@ pub struct Board {
     spades: Scored,
     clubs: Scored,
     deck: Deck,
+    turns: u8,
 }
 
 impl Board {
@@ -124,6 +132,7 @@ impl Board {
             spades: Scored::new(),
             clubs: Scored::new(),
             deck: Deck::new(),
+            turns: 0,
         };
         for i in 1..7 {
             b.cols[i - 1].cards.push(b.deck.draw().unwrap());
@@ -154,9 +163,67 @@ impl Board {
         b
     }
 
+    pub fn can_mov(&self, src: usize, dst: usize) -> bool {
+        let r = self.cols[dst].can_play(&self.cols[src].cards);
+        r
+    }
+
+    pub fn mov(&self, src: usize, dst: usize) -> Board {
+        let mut b = self.clone();
+        b.cols[dst] = b.cols[dst].play(&b.cols[src].cards).expect("Mov");
+        b.cols[src].cards.clear();
+        b.cols[src].turn();
+        b
+    }
+
     pub fn win(&self) -> bool {
-        self.hearts.cards.len() == 13 && self.diamonds.cards.len() == 13
-            && self.clubs.cards.len() == 13 && self.spades.cards.len() == 13
+        self.scored() == 52 as usize
+    }
+    pub fn scored(&self) -> usize {
+        self.hearts.cards.len() + self.diamonds.cards.len() + self.clubs.cards.len()
+            + self.spades.cards.len()
+    }
+
+    pub fn draw(&self) -> Result<Board, ()> {
+        let mut b = self.clone();
+        if b.deck.cards.len() == 0 {
+            // Don't allow  if turns above max
+            if b.turns == MAX_TURNS {
+                return Err(());
+            }
+
+            // Reset deck
+            b.cols[7]
+                .hidden
+                .push(b.cols[7].cards.pop().expect("Hidden"));
+            b.deck = Deck::from(b.cols[7].hidden.clone());
+            b.cols[7].hidden.clear();
+            // increment
+            b.turns += 1;
+        }
+        // Get 3 or remaining cards from deck
+        let mut d = vec![];
+        if b.deck.cards.len() < NUM_DRAW {
+            d = b.deck.cards.clone();
+            b.deck.cards.clear();
+        } else {
+            for _ in 0..NUM_DRAW {
+                d.push(b.deck.cards.pop().expect("d push"));
+            }
+        }
+        // Hide previous draw
+        if b.cols[7].cards.len() > 0 {
+            b.cols[7].hidden.push(b.cols[7].cards.pop().expect("hide"));
+        }
+        // Put on drawn pile
+        b.cols[7].cards.push(d.pop().expect("put on"));
+        b.cols[7].hidden.append(d.as_mut());
+
+        Ok(b)
+    }
+
+    pub fn get_id(&self) -> String {
+        format!("{}", self.deck)
     }
 }
 
