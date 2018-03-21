@@ -62,7 +62,7 @@ pub struct Deck {
 impl Deck {
     pub fn new() -> Deck {
         let mut d: Vec<Card> = Vec::new();
-        let ranks = vec![1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14];
+        let ranks = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
         for (s, r) in iproduct!(Suit::all(), ranks) {
             d.push(Card::new(s, r));
         }
